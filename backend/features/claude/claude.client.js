@@ -56,7 +56,6 @@ function detectPlan(org) {
   // shifted across claude.ai releases, so probe a few plausible fields
   // instead of hard-failing when one is missing.
   const candidates = [
-    org.billing_type,
     org.rate_limit_tier,
     org.plan,
     org.subscription_type,
