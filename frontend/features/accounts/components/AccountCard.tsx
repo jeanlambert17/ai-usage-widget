@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { UsageMetric } from "@features/usage/components/UsageMetric";
 import { formatRelative } from "@features/usage/lib/format";
 import type { UsageResult } from "@features/usage/types";
@@ -21,26 +32,49 @@ export function AccountCard({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-2">
-          <span className="font-heading text-sm font-medium">{account.label}</span>
-          {account.plan && (
-            <Badge variant="secondary" className="capitalize">
-              {account.plan}
-            </Badge>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <span title={account.label} className="min-w-0 truncate font-heading text-sm font-medium">
+              {account.label}
+            </span>
+            {account.plan && (
+              <Badge variant="secondary" className="shrink-0 capitalize">
+                {account.plan}
+              </Badge>
+            )}
+          </div>
+          {account.workspaceName && (
+            <p title={account.workspaceName} className="truncate text-xs text-muted-foreground">
+              {account.workspaceName}
+            </p>
           )}
         </div>
-        {account.workspaceName && (
-          <p className="text-xs text-muted-foreground">{account.workspaceName}</p>
-        )}
         <CardAction>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            title="Disconnect"
-            onClick={() => onDisconnect(account.id)}
-          >
-            <X />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={<Button variant="ghost" size="icon-sm" title="Disconnect" />}
+            >
+              <X />
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Disconnect {account.label}?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This deletes its stored session key from this machine. You'll need to log in
+                  again to reconnect it.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => onDisconnect(account.id)}
+                >
+                  Disconnect
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardAction>
       </CardHeader>
 

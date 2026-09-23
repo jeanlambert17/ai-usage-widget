@@ -62,9 +62,11 @@ export function TrayView() {
           const result = usageById[account.id];
           return (
             <div key={account.id} className="space-y-3 border-t border-border px-4 py-3">
-              <div className="flex items-baseline justify-between">
-                <span className="text-xs font-semibold">{account.label}</span>
-                <span className="text-[11px] text-muted-foreground">{account.workspaceName}</span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold leading-tight">{account.label}</p>
+                {account.workspaceName && (
+                  <p className="truncate text-[11px] text-muted-foreground">{account.workspaceName}</p>
+                )}
               </div>
 
               {!result && <p className="text-xs text-muted-foreground">Loading…</p>}

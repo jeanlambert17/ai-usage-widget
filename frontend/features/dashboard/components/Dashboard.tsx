@@ -43,7 +43,7 @@ export function Dashboard() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="max-w-5xl px-6 py-8">
         {loaded && accounts.length === 0 && (
           <div className="flex flex-col items-center gap-4 py-24 text-center">
             <h2 className="font-heading text-lg font-medium">No accounts connected yet</h2>
