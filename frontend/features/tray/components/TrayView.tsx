@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ExternalLink, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -15,15 +16,30 @@ function openDashboard() {
 }
 
 export function TrayView() {
-  const { accounts, loaded } = useAccounts();
-  const { usageById, lastUpdated, refresh } = useUsagePolling();
+  const { accounts, loaded, refresh: refreshAccounts } = useAccounts();
+  const { usageById, lastUpdated, refresh: refreshUsage } = useUsagePolling();
+
+  useEffect(() => {
+    return window.electronAPI?.onTrayShown(() => {
+      refreshAccounts();
+      refreshUsage();
+    });
+  }, [refreshAccounts, refreshUsage]);
 
   return (
     <div className="flex max-h-[560px] w-[340px] flex-col bg-background text-foreground">
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-sm font-medium">Your usage limits</span>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon-xs" title="Refresh" onClick={() => refresh()}>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            title="Refresh"
+            onClick={() => {
+              refreshAccounts();
+              refreshUsage();
+            }}
+          >
             <RefreshCw />
           </Button>
           <Button variant="ghost" size="icon-xs" title="Open dashboard" onClick={openDashboard}>

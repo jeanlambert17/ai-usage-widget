@@ -56,6 +56,13 @@ async function main() {
       mb.tray.popUpContextMenu(menu);
     });
   });
+
+  // The popover's window is created once and only ever shown/hidden after
+  // that, so its React app never remounts — tell it to refetch every time
+  // it's opened instead of leaving it stuck with whatever it first loaded.
+  mb.on("show", () => {
+    mb.window?.webContents.send("tray-shown");
+  });
 }
 
 main();

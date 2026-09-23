@@ -8,6 +8,7 @@ declare global {
     electronAPI?: {
       claudeLogin: () => Promise<{ sessionKey: string }>;
       openDashboard: () => Promise<void>;
+      onTrayShown: (callback: () => void) => () => void;
     };
   }
 }
