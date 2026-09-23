@@ -1,10 +1,8 @@
-import { useState } from "react";
-import { X, Check } from "lucide-react";
+import { X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardAction, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertDialog,
@@ -26,32 +24,11 @@ export function AccountCard({
   account,
   result,
   onDisconnect,
-  onUpdatePlan,
 }: {
   account: Account;
   result: UsageResult | undefined;
   onDisconnect: (id: string) => void;
-  onUpdatePlan: (id: string, plan: string | null) => void | Promise<void>;
 }) {
-  const [editingPlan, setEditingPlan] = useState(false);
-  const [planInput, setPlanInput] = useState(account.plan ?? "");
-  const [savingPlan, setSavingPlan] = useState(false);
-
-  function startEditPlan() {
-    setPlanInput(account.plan ?? "");
-    setEditingPlan(true);
-  }
-
-  async function savePlan() {
-    setSavingPlan(true);
-    try {
-      await onUpdatePlan(account.id, planInput.trim() || null);
-      setEditingPlan(false);
-    } finally {
-      setSavingPlan(false);
-    }
-  }
-
   return (
     <Card>
       <CardHeader>
@@ -60,44 +37,10 @@ export function AccountCard({
             <span title={account.label} className="min-w-0 truncate font-heading text-sm font-medium">
               {account.label}
             </span>
-            {editingPlan ? (
-              <div className="flex shrink-0 items-center gap-1">
-                <Input
-                  autoFocus
-                  value={planInput}
-                  onChange={(e) => setPlanInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") savePlan();
-                    if (e.key === "Escape") setEditingPlan(false);
-                  }}
-                  placeholder="e.g. Pro, Max, Team"
-                  className="h-6 w-28 px-1.5 text-xs"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon-xs"
-                  title="Save plan"
-                  disabled={savingPlan}
-                  onClick={savePlan}
-                >
-                  <Check />
-                </Button>
-              </div>
-            ) : account.plan ? (
-              <button type="button" onClick={startEditPlan} title="Click to edit plan" className="shrink-0">
-                <Badge variant="secondary" className="cursor-pointer capitalize">
-                  {account.plan}
-                </Badge>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={startEditPlan}
-                title="Set this account's plan"
-                className="shrink-0 text-[11px] text-muted-foreground underline decoration-dotted underline-offset-2 hover:text-foreground"
-              >
-                + Add plan
-              </button>
+            {account.plan && (
+              <Badge variant="secondary" className="shrink-0 capitalize">
+                {account.plan}
+              </Badge>
             )}
           </div>
           {account.workspaceName && (

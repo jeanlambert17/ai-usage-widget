@@ -1,13 +1,7 @@
 import { HttpError } from "../../src/lib/errors.js";
 import { getProvider } from "../providers/registry.js";
 import { claudeProvider } from "../claude/claude.provider.js";
-import {
-  addAccountsForSession,
-  listAccounts,
-  getAccount,
-  updateAccount,
-  removeAccount,
-} from "./accounts.store.js";
+import { addAccountsForSession, listAccounts, getAccount, removeAccount } from "./accounts.store.js";
 
 // Every available provider's client, keyed by provider id. This is the one
 // place that needs to change when a second provider goes from
@@ -44,12 +38,6 @@ export async function connectAccount({ providerId, label, sessionKey }) {
     sessionKey: trimmedKey,
     workspaces,
   });
-}
-
-export async function editAccountPlan(id, plan) {
-  const updated = await updateAccount(id, { plan });
-  if (!updated) throw new HttpError(404, "Account not found");
-  return updated;
 }
 
 export { listAccounts, getAccount, removeAccount };

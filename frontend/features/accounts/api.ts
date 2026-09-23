@@ -15,10 +15,3 @@ export function connectAccount(input: { providerId: string; label?: string; sess
 export function disconnectAccount(id: string) {
   return apiRequest<{ removed: boolean }>(`/api/accounts/${id}`, { method: "DELETE" });
 }
-
-export function updateAccountPlan(id: string, plan: string | null) {
-  return apiRequest<Account>(`/api/accounts/${id}`, {
-    method: "PATCH",
-    body: JSON.stringify({ plan }),
-  });
-}

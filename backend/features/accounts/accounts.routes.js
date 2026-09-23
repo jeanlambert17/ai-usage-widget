@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { connectAccount, listAccounts, removeAccount, editAccountPlan } from "./accounts.service.js";
+import { connectAccount, listAccounts, removeAccount } from "./accounts.service.js";
 
 export const accountsRouter = Router();
 
@@ -20,16 +20,6 @@ accountsRouter.post("/", async (req, res, next) => {
       sessionKey,
     });
     res.status(201).json(created);
-  } catch (err) {
-    next(err);
-  }
-});
-
-accountsRouter.patch("/:id", async (req, res, next) => {
-  try {
-    const { plan } = req.body ?? {};
-    const updated = await editAccountPlan(req.params.id, plan);
-    res.json(updated);
   } catch (err) {
     next(err);
   }

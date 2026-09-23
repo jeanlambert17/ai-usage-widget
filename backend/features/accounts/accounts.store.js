@@ -6,13 +6,13 @@ import { friendlyPlanLabel } from "../../src/lib/planLabel.js";
 
 const store = createJsonFileStore(path.join(DATA_DIR, "accounts.json"), []);
 
-// Public shape (never includes the sessionKey). Re-validates a non-manual
-// plan on every read, not just at connect time — otherwise a bad value
-// stored before this filter existed (or before it was tightened) would
-// linger forever, since nothing else ever re-detects it.
+// Public shape (never includes the sessionKey). Re-validates the plan on
+// every read, not just at connect time — otherwise a bad value stored
+// before this filter existed (or before it was tightened) would linger
+// forever, since nothing else ever re-detects it.
 function toPublic(account) {
   const { sessionKey, ...rest } = account;
-  if (!rest.planManual && rest.plan) {
+  if (rest.plan) {
     rest.plan = friendlyPlanLabel(rest.plan);
   }
   return rest;
@@ -46,11 +46,7 @@ export async function addAccountsForSession({ provider, label, sessionKey, works
     if (existing) {
       existing.label = workspaceLabel;
       existing.workspaceName = workspace.name;
-      // Don't clobber a plan the user set by hand with a fresh auto-detected
-      // (possibly null/wrong) guess on reconnect.
-      if (!existing.planManual) {
-        existing.plan = workspace.plan;
-      }
+      existing.plan = workspace.plan;
       created.push(toPublic(existing));
       return;
     }
@@ -70,23 +66,6 @@ export async function addAccountsForSession({ provider, label, sessionKey, works
 
   await store.write(accounts);
   return created;
-}
-
-// Manual override for fields auto-detection can't reliably provide (plan
-// name, currently). Marks plan as user-set so it survives future reconnects.
-export async function updateAccount(id, { plan } = {}) {
-  const accounts = await store.read();
-  const account = accounts.find((a) => a.id === id);
-  if (!account) return null;
-
-  if (plan !== undefined) {
-    const trimmed = typeof plan === "string" ? plan.trim() : null;
-    account.plan = trimmed || null;
-    account.planManual = Boolean(trimmed);
-  }
-
-  await store.write(accounts);
-  return toPublic(account);
 }
 
 export async function removeAccount(id) {
