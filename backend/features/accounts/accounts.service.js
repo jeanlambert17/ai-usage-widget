@@ -5,6 +5,7 @@ import {
   addAccountsForSession,
   listAccounts,
   getAccount,
+  updateAccount,
   removeAccount,
 } from "./accounts.store.js";
 
@@ -43,6 +44,12 @@ export async function connectAccount({ providerId, label, sessionKey }) {
     sessionKey: trimmedKey,
     workspaces,
   });
+}
+
+export async function editAccountPlan(id, plan) {
+  const updated = await updateAccount(id, { plan });
+  if (!updated) throw new HttpError(404, "Account not found");
+  return updated;
 }
 
 export { listAccounts, getAccount, removeAccount };

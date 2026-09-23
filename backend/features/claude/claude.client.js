@@ -51,17 +51,32 @@ export async function listOrganizations(sessionKey) {
   }));
 }
 
+// claude.ai's org fields hold internal engineering values (billing
+// mechanisms, rate-limit-config codenames like "default_raven") that have
+// nothing to do with the customer-facing plan name — there's no reliable way
+// to derive "Pro"/"Max"/"Team" from them. Only recognize known plan
+// keywords; anything else returns null (no badge) rather than showing raw
+// internal noise. Accounts can also have their plan set manually via
+// PATCH /api/accounts/:id for exactly this reason.
+function friendlyPlanLabel(raw) {
+  const value = String(raw).toLowerCase();
+  const maxMultiplier = value.match(/max[_-]?(\d+)x/);
+  if (maxMultiplier) return `Max ${maxMultiplier[1]}x`;
+  if (value.includes("enterprise")) return "Enterprise";
+  if (value.includes("team")) return "Team";
+  if (value.includes("max")) return "Max";
+  if (value.includes("pro")) return "Pro";
+  if (value.includes("free")) return "Free";
+  return null;
+}
+
 function detectPlan(org) {
-  // The org payload's shape for plan/tier info isn't documented and has
-  // shifted across claude.ai releases, so probe a few plausible fields
-  // instead of hard-failing when one is missing.
-  const candidates = [
-    org.rate_limit_tier,
-    org.plan,
-    org.subscription_type,
-  ].filter(Boolean);
-  if (candidates.length === 0) return null;
-  return String(candidates[0]).replace(/_/g, " ");
+  const candidates = [org.rate_limit_tier, org.plan, org.subscription_type].filter(Boolean);
+  for (const candidate of candidates) {
+    const label = friendlyPlanLabel(candidate);
+    if (label) return label;
+  }
+  return null;
 }
 
 // Returns raw usage payload for one organization.

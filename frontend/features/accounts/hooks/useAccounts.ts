@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { fetchAccounts, disconnectAccount as apiDisconnect } from "../api";
+import { fetchAccounts, disconnectAccount as apiDisconnect, updateAccountPlan } from "../api";
 import type { Account } from "../types";
 
 const REFRESH_INTERVAL_MS = 60_000;
@@ -31,5 +31,13 @@ export function useAccounts() {
     [refresh]
   );
 
-  return { accounts, loaded, refresh, disconnect };
+  const setPlan = useCallback(
+    async (id: string, plan: string | null) => {
+      await updateAccountPlan(id, plan);
+      await refresh();
+    },
+    [refresh]
+  );
+
+  return { accounts, loaded, refresh, disconnect, setPlan };
 }

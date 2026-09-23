@@ -9,7 +9,7 @@ import { AccountCard } from "@features/accounts/components/AccountCard";
 import { ConnectAccountDialog } from "@features/accounts/components/ConnectAccountDialog";
 
 export function Dashboard() {
-  const { accounts, loaded, refresh: refreshAccounts, disconnect } = useAccounts();
+  const { accounts, loaded, refresh: refreshAccounts, disconnect, setPlan } = useAccounts();
   const { usageById, lastUpdated, refresh: refreshUsage } = useUsagePolling();
   const [connectOpen, setConnectOpen] = useState(false);
 
@@ -62,6 +62,7 @@ export function Dashboard() {
                 account={account}
                 result={usageById[account.id]}
                 onDisconnect={disconnect}
+                onUpdatePlan={setPlan}
               />
             ))}
           </div>
