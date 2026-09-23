@@ -19,7 +19,7 @@ function openDashboardWindow() {
   dashboardWindow = new BrowserWindow({
     width: 980,
     height: 720,
-    title: "Claude Usage",
+    title: "AI Usage",
     webPreferences: { preload: PRELOAD, contextIsolation: true },
   });
   dashboardWindow.loadURL(`http://localhost:${PORT}/`);
@@ -43,7 +43,7 @@ async function main() {
       resizable: false,
       webPreferences: { preload: PRELOAD, contextIsolation: true },
     },
-    tooltip: "Claude Usage",
+    tooltip: "AI Usage",
   });
 
   mb.on("ready", () => {
@@ -51,7 +51,7 @@ async function main() {
       const menu = Menu.buildFromTemplate([
         { label: "Open dashboard", click: openDashboardWindow },
         { type: "separator" },
-        { label: "Quit Claude Usage", click: () => app.quit() },
+        { label: "Quit AI Usage", click: () => app.quit() },
       ]);
       mb.tray.popUpContextMenu(menu);
     });
