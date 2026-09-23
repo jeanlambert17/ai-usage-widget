@@ -2,14 +2,14 @@
 # backend serving its built output. The desktop-only pieces (electron/,
 # assets/, scripts/) never enter either stage.
 
-FROM node:20-alpine AS frontend-build
+FROM node:22-alpine AS frontend-build
 WORKDIR /app/frontend
 COPY frontend/package.json ./
 RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
-FROM node:20-alpine AS runtime
+FROM node:22-alpine AS runtime
 WORKDIR /app/backend
 
 COPY backend/package.json ./
