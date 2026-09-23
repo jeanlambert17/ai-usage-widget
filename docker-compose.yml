@@ -1,0 +1,16 @@
+services:
+  claude-usage:
+    build: .
+    ports:
+      - "4173:4173"
+    environment:
+      - PORT=4173
+    volumes:
+      # Named volume so account session keys survive rebuilds/restarts.
+      # Swap for a bind mount (e.g. "./data:/app/backend/data") if you want
+      # the accounts.json file directly accessible on the host.
+      - claude-usage-data:/app/backend/data
+    restart: unless-stopped
+
+volumes:
+  claude-usage-data:

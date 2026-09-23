@@ -1,0 +1,25 @@
+{
+  "name": "ai-usage-snippet",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Multi-account AI usage dashboard. Claude today, more providers later.",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "main": "electron/main.cjs",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:frontend": "npm run dev --workspace frontend",
+    "build:frontend": "npm run build --workspace frontend",
+    "start": "npm run build:frontend && npm run start --workspace backend",
+    "tray": "npm run build:frontend && electron ."
+  },
+  "devDependencies": {
+    "electron": "^37.0.0",
+    "menubar": "^9.5.1"
+  }
+}
