@@ -2,12 +2,19 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { createJsonFileStore } from "../../src/lib/jsonFileStore.js";
 import { DATA_DIR } from "../../src/config.js";
+import { friendlyPlanLabel } from "../../src/lib/planLabel.js";
 
 const store = createJsonFileStore(path.join(DATA_DIR, "accounts.json"), []);
 
-// Public shape (never includes the sessionKey).
+// Public shape (never includes the sessionKey). Re-validates a non-manual
+// plan on every read, not just at connect time — otherwise a bad value
+// stored before this filter existed (or before it was tightened) would
+// linger forever, since nothing else ever re-detects it.
 function toPublic(account) {
   const { sessionKey, ...rest } = account;
+  if (!rest.planManual && rest.plan) {
+    rest.plan = friendlyPlanLabel(rest.plan);
+  }
   return rest;
 }
 

@@ -8,6 +8,7 @@
 // completed in an embedded browser window (see the desktop app's login
 // flow) — either way, it's equivalent to being logged in as that account.
 import { ProviderAuthError } from "../../src/lib/errors.js";
+import { friendlyPlanLabel } from "../../src/lib/planLabel.js";
 
 const BASE_URL = "https://claude.ai";
 
@@ -49,25 +50,6 @@ export async function listOrganizations(sessionKey) {
     name: org.name ?? "Personal",
     plan: detectPlan(org),
   }));
-}
-
-// claude.ai's org fields hold internal engineering values (billing
-// mechanisms, rate-limit-config codenames like "default_raven") that have
-// nothing to do with the customer-facing plan name — there's no reliable way
-// to derive "Pro"/"Max"/"Team" from them. Only recognize known plan
-// keywords; anything else returns null (no badge) rather than showing raw
-// internal noise. Accounts can also have their plan set manually via
-// PATCH /api/accounts/:id for exactly this reason.
-function friendlyPlanLabel(raw) {
-  const value = String(raw).toLowerCase();
-  const maxMultiplier = value.match(/max[_-]?(\d+)x/);
-  if (maxMultiplier) return `Max ${maxMultiplier[1]}x`;
-  if (value.includes("enterprise")) return "Enterprise";
-  if (value.includes("team")) return "Team";
-  if (value.includes("max")) return "Max";
-  if (value.includes("pro")) return "Pro";
-  if (value.includes("free")) return "Free";
-  return null;
 }
 
 function detectPlan(org) {
