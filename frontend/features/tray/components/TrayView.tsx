@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ExternalLink, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,16 +18,25 @@ function openDashboard() {
 export function TrayView() {
   const { accounts, loaded, refresh: refreshAccounts } = useAccounts();
   const { usageById, lastUpdated, refresh: refreshUsage } = useUsagePolling();
+  // The popover window is never destroyed between opens (see main.cjs), so a
+  // plain mount-triggered CSS animation would only ever play once. Bumping
+  // this on every "tray-shown" forces the animated wrapper to remount, so
+  // the pop-in effect replays each time the icon is clicked.
+  const [openKey, setOpenKey] = useState(0);
 
   useEffect(() => {
     return window.electronAPI?.onTrayShown(() => {
       refreshAccounts();
       refreshUsage();
+      setOpenKey((k) => k + 1);
     });
   }, [refreshAccounts, refreshUsage]);
 
   return (
-    <div className="flex max-h-[560px] w-[340px] flex-col bg-background text-foreground">
+    <div
+      key={openKey}
+      className="flex max-h-[560px] w-[340px] origin-top flex-col bg-background text-foreground animate-in fade-in zoom-in-95 duration-150 ease-out"
+    >
       <div className="flex items-center justify-between px-4 py-3">
         <span className="text-sm font-medium">Your usage limits</span>
         <div className="flex items-center gap-1">
