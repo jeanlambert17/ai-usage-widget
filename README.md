@@ -95,6 +95,12 @@ active on your host.
 
 ## Run it
 
+```
+git clone git@github.com:jeanlambert17/ai-usage-widget.git
+cd ai-usage-widget
+nvm use   # see "Node version" below
+```
+
 **As a menu-bar tray app (recommended):**
 
 ```
@@ -138,7 +144,12 @@ stored session key) along with the containers.
 - Weekly usage across all models, plus per-model (Opus/Sonnet) weekly usage
   when the API returns it
 - Extra usage spend vs. budget, when applicable
-- Plan/org badge and last-updated time
+- Org name, and a plan badge (Pro/Max/Team/Enterprise/Free) when it can be
+  reliably detected — claude.ai's API mostly exposes internal engineering
+  codenames rather than the customer-facing plan name, so the badge is
+  intentionally omitted rather than showing that raw noise
+- Last-updated time, and a confirmation prompt before disconnecting an
+  account (deletes its stored session key from this machine)
 
 ## Notes on dependency versions
 
