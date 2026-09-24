@@ -1,24 +1,16 @@
 # AI Usage — multi-account, multi-provider usage dashboard
 
-A dashboard that shows AI usage — session/weekly quota today, more later —
-for as many accounts as you connect, side by side. Built around a provider
-registry: **Claude is the only implemented provider today**, but "Connect
-account" is already a provider menu, and adding ChatGPT/Gemini later means
-adding a `backend/features/<provider>/` module, not a redesign.
+A dashboard that shows AI usage — session/weekly quota today.
 
-## Why this exists / how Claude usage data is obtained
+## how Claude usage data is obtained
 
-There is no official public API for a Claude.ai Pro/Max/Team subscriber's
-usage quota (see `DISCUSSION.md` for the full research). The only place that
-data lives is an internal endpoint claude.ai's own web client calls:
+There is no official public API for a Claude subscriber's usage quota. The only place that data lives is an internal endpoint claude.ai's own web client calls:
 
 ```
 GET https://claude.ai/api/organizations/{orgId}/usage
 ```
 
-authenticated with the `sessionKey` cookie from a logged-in browser session —
-equivalent to being logged in as that account. This app speaks that same
-protocol directly. Nothing is ever sent anywhere except `claude.ai`.
+Authenticated with the `sessionKey` cookie from a logged-in browser session — equivalent to being logged in as that account.
 
 **This is an unofficial, reverse-engineered endpoint** and can change or
 break without notice.
@@ -29,7 +21,7 @@ An npm workspace with two packages plus a thin desktop shell:
 
 ```
 backend/            Express API (@ai-usage-snippet/backend)
-  src/                 globals: app assembly, server bootstrap, config, generic lib (JSON file store, error types)
+  src/                 globals: app assembly, server bootstrap, config, generic lib.
   features/
     providers/           the provider registry ("Connect account" menu source)
     claude/               Claude's client (the fetch calls above) + its provider adapter
@@ -51,34 +43,12 @@ electron/            Desktop shell: starts the backend in-process, hosts a tray
   claudeLogin.cjs        opens a real claude.ai login page, captures the resulting cookie
 ```
 
-The backend serves the frontend's built static files itself (`backend/src/app.js`),
+- The backend serves the frontend's built static files itself (`backend/src/app.js`),
 so in both Docker and the plain web mode there's exactly one process and one
-port. Electron just adds a tray icon and window chrome around that same
-backend + frontend.
+port. 
+- Electron just adds a tray icon and window chrome around that same backend + frontend.
 
-## Connecting an account
-
-Click **+ Connect account** → pick a provider (only Claude is available
-today; others show "Coming soon"). What happens next depends on how you're
-running the app:
-
-- **In the tray/desktop app:** click "Log in with Claude" — a real browser
-  window opens on claude.ai's actual login page. Log in however you normally
-  would (Google SSO, email OTP, whatever). Your password never touches this
-  app's code; the app only reads the resulting session cookie once login
-  succeeds, then discards that login window's browser session entirely.
-- **In a plain browser tab (e.g. the Docker-served dashboard):** there's no
-  way for a webpage to pop a native login window or read another site's
-  cookies — that's a basic browser security boundary, not a missing feature.
-  You'll get a manual fallback instead: paste the `sessionKey` cookie value
-  copied from your own browser's DevTools (Application/Storage → Cookies →
-  `https://claude.ai`).
-
-If the account belongs to multiple organizations (e.g. a personal workspace
-and a Team), one card is created per organization automatically. The
-dashboard polls every 60 seconds; there's also a manual refresh button.
-
-## Node version
+## Setup
 
 This project needs **Node ≥22.12** (Electron 44's own requirement — see
 below). An `.nvmrc` pins the exact version this was built against:
@@ -118,7 +88,7 @@ icon — this is tray-only.
 npm run start
 ```
 
-Then open http://localhost:4173.
+Then open [http://localhost:4173](http://localhost:4173).
 
 **For frontend development** (hot reload against a running backend):
 
@@ -134,55 +104,10 @@ menu bar):
 docker compose up -d --build
 ```
 
-Then open http://localhost:4173. Connected accounts persist in a named Docker
-volume (`claude-usage-data`); `docker compose down -v` wipes it (and every
-stored session key) along with the containers.
-
 ## What's shown per account
 
 - Current 5-hour session usage and reset time
 - Weekly usage across all models, plus per-model (Opus/Sonnet) weekly usage
-  when the API returns it
+when the API returns it
 - Extra usage spend vs. budget, when applicable
-- Org name, and a plan badge (Pro/Max/Team/Enterprise/Free) when it can be
-  reliably detected — claude.ai's API mostly exposes internal engineering
-  codenames rather than the customer-facing plan name, so the badge is
-  intentionally omitted rather than showing that raw noise
-- Last-updated time, and a confirmation prompt before disconnecting an
-  account (deletes its stored session key from this machine)
 
-## Notes on dependency versions
-
-Runs current majors throughout: **Electron 44.x** and **Vite 8.x** (Rolldown
-bundler). Both need Node ≥22.12/20.19 to install, which is exactly what the
-`.nvmrc` above is for. Two things worth knowing:
-
-- **Electron 44 dropped its automatic postinstall download.** Older Electron
-  majors fetched their platform binary via a `postinstall` script declared in
-  electron's own `package.json`; 44's `package.json` has no `scripts` field
-  at all, so nothing downloads it automatically anymore. This project's root
-  `package.json` adds its own `postinstall` that runs
-  `node_modules/electron/install.js` explicitly, so plain `npm install`
-  still works — but it's a project-level workaround, not default behavior of
-  the `electron` package itself.
-- **Vite 8's Rolldown bundler ships platform-specific native binaries**
-  (`@rolldown/binding-<platform>`) as optional dependencies. These installed
-  correctly once Node was ≥22.12; on the older Node 20.15 this project
-  briefly ran on, npm silently failed to install any of them at all (a known
-  npm optional-dependency bug), which is what originally forced a Vite 6
-  downgrade — no longer needed now that the Node floor is raised.
-
-The tray icon itself is generated by `scripts/generate-tray-icon.mjs` into
-`assets/` (a hand-encoded PNG, no image library needed) — rerun it for a
-different glyph.
-
-## Not in this MVP
-
-- Per-prompt / per-token logs (no official source gives that granularity for
-  subscription accounts — see `DISCUSSION.md`)
-- ChatGPT, Gemini, or local-model providers (the menu already lists them as
-  "Coming soon"; implementing one means adding `backend/features/<provider>/`
-  with a `listWorkspaces`/`getUsage` adapter and a matching frontend connect
-  step)
-- Windows tray packaging (the Electron/menubar setup should work as-is on
-  Windows, but it's only been run on macOS so far)
